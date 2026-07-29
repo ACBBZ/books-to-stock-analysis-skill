@@ -1,0 +1,4 @@
+interface:
+  display_name: "Generated Investing Skill"
+  short_description: "Replace with a specific, source-grounded capability"
+  default_prompt: "Use this skill only for its declared source-grounded workflow and preserve all stated boundaries."
