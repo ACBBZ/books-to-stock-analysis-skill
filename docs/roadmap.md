@@ -1,25 +1,44 @@
 # Roadmap
 
-## M1 — Core IR and deterministic runtime
+## V0.2 — Installable meta-skill
 
-Typed skill documents, safe DSL, technical feature primitives, evidence-based evaluation, CLI, synthetic example, tests, and CI.
+- Root `SKILL.md` usable by Codex and Agent Skills-compatible clients.
+- Chinese and English READMEs.
+- `agents/openai.yaml` metadata.
+- Output specification, taxonomy, visual policy, quality gate, and copyright policy.
+- Generated-skill templates.
+- Deterministic pack validator and reproducible packager.
 
-## M2 — Market data and detector registry
+## V0.3 — Source mapping workflow
 
-Versioned OHLCV schema, CSV/Parquet loading, A-share market profile, feature dependency graph, look-ahead tests, and detector code hashes.
+- Native PDF/EPUB/DOCX text-layer guidance.
+- Direct page-image inspection with no OCR engine.
+- Chapter, page, figure, and visual-coverage reports.
+- Checkpoint and resume conventions for large books.
 
-## M3 — Private book ingestion
+## V0.4 — Automated extraction and verification
 
-PDF page model, source fragments, private image provenance, extraction confidence, and copyright-safe exports.
+- Technical-analysis, value-investing, financial-analysis, biography, and mixed modes.
+- Candidate taxonomy and unresolved-parameter policy.
+- Independent source and visual verification passes.
+- Deduplication, conflict preservation, and boundary criticism.
 
-## M4 — Human review and compilation
+## V0.5 — Skill compilation
 
-Candidate lifecycle, unresolved parameters, skill compilation, golden/adversarial cases, and publication gates.
+- Book router plus independently installable child skills.
+- `installable/`, `provisional/`, and `rejected/` release states.
+- Trigger and adversarial tests.
+- Manifest, provenance, copyright, and quality reports.
 
-## M5 — Empirical validation
+## V1.0 — Reliable book-to-skill generator
 
-Point-in-time universes, event studies, walk-forward tests, transaction costs, A-share tradability, sensitivity reports, and empirical ratings.
+- End-to-end synthetic technical book.
+- End-to-end synthetic investor biography.
+- Image-heavy test source.
+- Recovery from interrupted generation.
+- Stable automated quality gates.
+- Copyright-safe export checks.
 
-## M6 — Agent orchestration
+## Out of scope
 
-Skill routing, prerequisite and veto graphs, risk critic, structured source/data references, and reproducible audit bundles.
+Live market data, current stock analysis, scanning, profitability backtests, broker connectivity, order execution, portfolio management, and installation of generated child skills.
