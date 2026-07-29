@@ -1,6 +1,6 @@
 # Design
 
-The original deterministic stock-analysis runtime design has been superseded by the installable meta-skill architecture.
+The original deterministic stock-analysis runtime design has been superseded by the installable book-to-Skill architecture.
 
 The canonical design is [`OPTIMIZATION_DESIGN.md`](OPTIMIZATION_DESIGN.md).
 
