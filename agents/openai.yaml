@@ -1,4 +1,4 @@
 interface:
   display_name: "Books to Stock Analysis Skill"
-  short_description: "Turn investing books into active cross-agent Skills"
-  default_prompt: "Use books-to-stock-analysis-skill to convert the provided investing book into source-traceable Agent Skills. Inspect charts and page images directly, do not use OCR, quarantine low-confidence candidates, and activate accepted skills automatically for the current host."
+  short_description: "Turn investing books into active, source-traceable Skills"
+  default_prompt: "Use $books-to-stock-analysis-skill to convert the provided investing book into source-traceable Agent Skills. Inspect charts and page images directly, do not use OCR, quarantine low-confidence candidates, and activate accepted Skills automatically for Codex or the current supported host."
