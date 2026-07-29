@@ -1,0 +1,4 @@
+interface:
+  display_name: "Books to Stock Analysis Skill"
+  short_description: "Turn investing books into installable Agent Skill Packs"
+  default_prompt: "Use $books-to-stock-analysis-skill to convert the provided investing book into a source-traceable, copyright-aware Agent Skill Pack. Inspect charts and page images directly, do not use OCR, and quarantine low-confidence candidates."
