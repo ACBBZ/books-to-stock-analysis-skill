@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Activate generated Agent Skills for OpenClaw, Hermes, or Claude Code.
 
-The command copies every accepted skill under PACK/installable into the active
-host's native skill directory. It is intended to run automatically after book
-conversion, so users do not need a second manual install step.
+The command validates a pack, then copies every accepted skill under
+PACK/installable into the active host's native skill directory. It is intended
+to run automatically after book conversion, so users do not need a second
+manual install step.
 """
 
 from __future__ import annotations
@@ -17,6 +18,8 @@ import sys
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
+
+from validate_pack import validate_pack
 
 SUPPORTED_HOSTS = ("openclaw", "hermes", "claude-code")
 SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -163,7 +166,10 @@ def _copy_skill(source: Path, destination: Path, force: bool) -> str:
             )
 
     destination.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix=".book-skill-", dir=destination.parent) as temp_dir:
+    with tempfile.TemporaryDirectory(
+        prefix=".book-skill-",
+        dir=destination.parent,
+    ) as temp_dir:
         staged = Path(temp_dir) / destination.name
         shutil.copytree(source, staged)
         _tree_digest(staged)
@@ -186,7 +192,8 @@ def _write_report(pack_dir: Path, report: ActivationReport) -> Path:
     lines.append("unchanged:")
     lines.extend(f"  - {name}" for name in report.unchanged)
     lines.append("warnings:")
-    lines.extend(f'  - "{warning.replace(chr(34), chr(39))}"' for warning in report.warnings)
+    safe_warnings = (warning.replace('"', "'") for warning in report.warnings)
+    lines.extend(f'  - "{warning}"' for warning in safe_warnings)
     report_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return report_path
 
@@ -204,6 +211,12 @@ def activate_pack(
     pack_dir = pack_dir.resolve()
     workspace = workspace.resolve()
     home = home.expanduser().resolve()
+
+    validation = validate_pack(pack_dir)
+    if not validation.ok:
+        details = "\n".join(validation.errors)
+        raise ActivationError(f"Pack validation failed:\n{details}")
+
     if host == "auto":
         host = detect_host(workspace)
 
