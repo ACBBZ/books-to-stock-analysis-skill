@@ -2,19 +2,22 @@
 
 Generated skills must be usable without asking the user to perform a second manual installation.
 
-The meta-skill therefore uses two activation layers:
+The meta-skill uses two activation layers:
 
 1. **Native activation** — copy accepted child skills into the active host's recognized skill directory.
 2. **Same-session routing** — immediately load the generated router and manifest, so the parent meta-skill can use child skills even if the host has not refreshed its native skill index yet.
 
-## Common rule
+## Resolve bundled tools
 
-After a pack passes validation:
+Resolve `<skill-base>` as the directory containing the loaded parent `SKILL.md`.
+
+Never assume the current working directory is the repository or installed Skill directory. Invoke bundled scripts with absolute paths derived from `<skill-base>`:
 
 ```bash
-python scripts/activate_pack.py <pack> \
-  --host <openclaw|hermes|claude-code> \
-  --workspace <workspace>
+python "<skill-base>/scripts/validate_pack.py" "<pack>"
+python "<skill-base>/scripts/activate_pack.py" "<pack>" \
+  --host "<openclaw|hermes|claude-code>" \
+  --workspace "<workspace>"
 ```
 
 Do not tell the user to install each generated child skill.
@@ -29,8 +32,6 @@ Default project target:
 <workspace>/.agents/skills/<skill-name>/SKILL.md
 ```
 
-OpenClaw recognizes project-agent skills under `.agents/skills`. The meta-skill must also keep the generated router loaded for the current session because native slash-command discovery can depend on the active skill snapshot.
-
 Global activation can target:
 
 ```text
@@ -43,7 +44,9 @@ or, when `OPENCLAW_STATE_DIR` is unset:
 ~/.openclaw/skills/
 ```
 
-OpenClaw invocation:
+The parent meta-skill keeps the generated router loaded because native slash-command discovery can depend on the host's active Skill snapshot.
+
+Invocation:
 
 ```text
 /books-to-stock-analysis-skill
@@ -63,7 +66,7 @@ or, when `HERMES_HOME` is unset:
 ~/.hermes/skills/<skill-name>/SKILL.md
 ```
 
-Hermes uses this directory as its primary skill store. When the host exposes `skill_manage`, the meta-skill may use it instead of raw file copying. The parent meta-skill must still load the generated router immediately for the current session.
+When Hermes exposes `skill_manage`, the meta-skill may use it instead of raw file copying. It must still load the generated router immediately for the current session.
 
 A project-scoped alternative is:
 
@@ -71,9 +74,11 @@ A project-scoped alternative is:
 <workspace>/.agents/skills/
 ```
 
-but Hermes must have that absolute path configured under `skills.external_dirs` in `~/.hermes/config.yaml`.
+Hermes must have that absolute path configured under `skills.external_dirs` in `~/.hermes/config.yaml`.
 
-Hermes invocation:
+When installed from a direct `SKILL.md` URL, all relative bundled references and scripts listed by the parent Skill must be present. Missing resources are an incomplete installation error.
+
+Invocation:
 
 ```text
 /books-to-stock-analysis-skill
@@ -87,15 +92,15 @@ Default project target:
 <workspace>/.claude/skills/<skill-name>/SKILL.md
 ```
 
-Claude Code monitors existing personal and project skill roots for changes and normally hot-loads new child skills in the current session. If the top-level `.claude/skills` directory did not exist when the session started, the parent meta-skill remains the same-session fallback.
-
 Global activation can target:
 
 ```text
 ~/.claude/skills/
 ```
 
-Claude Code invocation:
+Claude Code normally hot-loads changes beneath existing personal and project Skill roots. If native discovery has not refreshed, the parent meta-skill remains the same-session fallback.
+
+Invocation:
 
 ```text
 /books-to-stock-analysis-skill
@@ -108,8 +113,8 @@ After native activation, the meta-skill must:
 1. Open `<pack>/manifest.yaml`.
 2. Locate the book-level router under `<pack>/installable/`.
 3. Open the router's `SKILL.md`.
-4. Keep the router and child-skill index available for follow-up requests.
-5. When a follow-up matches a child skill, open that child's `SKILL.md` and required references.
+4. Keep the router and child-Skill index available for follow-up requests.
+5. When a follow-up matches a child Skill, open that child's `SKILL.md` and required references.
 6. Follow it directly even if the host has not yet exposed a native slash command.
 
 This is not a second installation. It is the continuation of the same generation workflow.
@@ -131,8 +136,9 @@ warnings: []
 
 ## Safety
 
+- Validate the complete pack before activation.
 - Reject symlinks inside generated child skills.
-- Do not copy original books into host skill directories.
-- Do not overwrite a different existing skill unless replacement is explicit.
+- Do not copy original books into host Skill directories.
+- Do not overwrite a different existing Skill unless replacement is explicit.
 - Preserve provenance, trigger tests, and supporting references.
 - Do not write to more than one host root unless the user asks for multi-host activation.
