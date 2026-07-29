@@ -1,10 +1,10 @@
 # Roadmap
 
-## V0.3 — Cross-host meta-skill
+## V0.3 — Cross-host Skill
 
-- Root `SKILL.md` compatible with OpenClaw, Hermes Agent, and Claude Code.
-- Chinese and English installation examples for all three hosts.
-- Portable child-skill template based on `SKILL.md`.
+- Root `SKILL.md` compatible with Codex, OpenClaw, Hermes Agent, and Claude Code.
+- Chinese and English installation and usage examples for all four hosts.
+- Portable child-Skill template based on `SKILL.md`.
 - Automatic host-native activation with same-session routing fallback.
 - Deterministic validation, activation, and reproducible packaging tools.
 
@@ -24,15 +24,16 @@
 
 ## V0.6 — Skill compilation and live activation
 
-- Book router plus independent child skills.
+- Book router plus independent child Skills.
 - `installable/`, `provisional/`, and `rejected/` release states.
 - Trigger and adversarial tests.
 - Manifest, provenance, copyright, quality, and activation reports.
+- Codex `.agents/skills` activation and `$skill-name` invocation.
 - OpenClaw `.agents/skills` activation.
 - Claude Code `.claude/skills` activation and hot reload.
 - Hermes `$HERMES_HOME/skills` activation.
 
-## V1.0 — Reliable book-to-skill generator
+## V1.0 — Reliable book-to-Skill generator
 
 - End-to-end synthetic technical book.
 - End-to-end synthetic investor biography.
@@ -40,7 +41,7 @@
 - Recovery from interrupted generation.
 - Stable automated quality gates.
 - Copyright-safe export checks.
-- Same-session generated-skill use verified on all supported hosts.
+- Same-session generated-Skill use verified on all supported hosts.
 
 ## Out of scope
 
