@@ -1,26 +1,39 @@
 ---
 name: books-to-stock-analysis-skill
-description: Convert stock-market, trading, investing, financial-analysis, or investor-biography books into portable Agent Skill Packs. Use when the user asks to split, distill, compile, or transform a book or source collection into installable skills. Read native text when available and inspect charts, figures, and scanned pages directly with the host agent's multimodal capabilities. Do not use OCR engines, fetch market data, analyze current stocks, backtest returns, connect to brokers, or execute trades.
+description: Convert stock-market, trading, investing, financial-analysis, or investor-biography books into source-traceable Agent Skills, then activate accepted skills automatically for OpenClaw, Hermes Agent, or Claude Code so the current agent can use them without a second manual install. Read native text when available and inspect charts, figures, and scanned pages directly. Do not use OCR engines, fetch market data, backtest returns, connect to brokers, or execute trades.
+version: 0.3.0
+user-invocable: true
+platforms: [macos, linux, windows]
+metadata: {"hermes":{"tags":["investing","books","skill-generator"],"category":"research"},"openclaw":{"tags":["investing","books","skill-generator"]}}
 ---
 
 # Books to Stock Analysis Skill
 
-Convert one or more user-provided investing sources into a copyright-aware, source-traceable, installable Agent Skill Pack.
+Convert one or more user-provided investing sources into a copyright-aware, source-traceable Skill Pack, then activate accepted child skills for the current host.
+
+## Supported hosts
+
+- OpenClaw
+- Hermes Agent
+- Claude Code
+- other AgentSkills-compatible hosts may use the portable pack, but automatic activation is only defined for the three hosts above
 
 ## Scope
 
 This skill owns:
 
 - source inventory and capability checks
-- chapter and page mapping
+- chapter, page, and figure mapping
 - direct visual inspection of charts and page images
 - knowledge extraction and classification
 - source verification
 - deduplication and conflict handling
-- skill compilation
+- child-skill compilation
 - trigger-test generation
 - automated quality gates
-- packaging
+- host-native activation
+- same-session routing to newly generated skills
+- optional packaging
 
 This skill does not own:
 
@@ -29,20 +42,22 @@ This skill does not own:
 - profitability validation
 - backtesting
 - brokerage integration
-- generated-skill installation
 - order execution
 
-## Required first step: capability check
+## Required first step: capability and host check
 
 Before processing a source:
 
 1. Confirm that every input file exists and is readable.
 2. Identify file type, size, page count when available, and whether a native text layer exists.
 3. Confirm that the host can render or inspect page images.
-4. Confirm that the requested output directory is writable.
-5. Stop with a clear error if image inspection is required but unavailable.
+4. Identify the active host as `openclaw`, `hermes`, or `claude-code`.
+5. Confirm that the pack output directory and host activation target are writable.
+6. Stop with a clear error if image inspection is required but unavailable.
 
 Do not silently omit image-only pages.
+
+Load `references/HOST_ACTIVATION.md` before choosing an activation target.
 
 ## Reading policy
 
@@ -88,6 +103,8 @@ Candidates may be:
 - psychology
 - reference_only
 
+Load `references/TAXONOMY.md` when classifying candidates.
+
 ## Multi-pass workflow
 
 ### Pass 1: map the source
@@ -103,7 +120,7 @@ Create:
 
 ### Pass 2: extract candidates
 
-Extract candidate units with:
+Each candidate must include:
 
 - canonical name
 - source statement summary
@@ -111,7 +128,7 @@ Extract candidate units with:
 - category
 - trigger scenarios
 - required inputs
-- executable workflow
+- repeatable workflow
 - boundaries
 - counterexamples
 - unresolved parameters
@@ -128,6 +145,8 @@ For every candidate:
 - reject unsupported model inventions
 - mark author opinion as opinion
 - preserve contradictory author statements
+
+Load `references/VISUAL_ANALYSIS.md` for image-grounded candidates.
 
 ### Pass 4: normalize and deduplicate
 
@@ -152,17 +171,18 @@ Add:
 
 Never invent a numeric threshold that the source does not define. Store it as an unresolved parameter.
 
-### Pass 6: compile skills
+### Pass 6: compile child skills
 
-Generate independently installable skill directories under `installable/`.
+Generate child skills under `installable/` using `assets/templates/generated-skill/`.
 
-Every installable skill requires:
+Every accepted child skill requires:
 
 - `SKILL.md`
-- `agents/openai.yaml`
-- source references
-- trigger tests
-- confidence and provenance metadata
+- `references/provenance.yaml`
+- `tests/trigger-tests.yaml`
+- confidence and source metadata
+
+Host-specific metadata files are optional. The portable `SKILL.md` is the source of truth.
 
 Strategy-like skills should also include `skill.yaml` with data requirements, conditions, invalidation, and unresolved parameters.
 
@@ -185,20 +205,42 @@ Otherwise:
 - place useful but incomplete candidates in `provisional/`
 - place duplicate or unverifiable candidates in `rejected/`
 
-## Reference files
+Load `references/QUALITY_GATE.md` and `references/COPYRIGHT_POLICY.md` for this pass.
 
-Load only the references needed for the current stage:
+### Pass 8: validate and activate automatically
 
-- `references/TAXONOMY.md` for candidate classification.
-- `references/VISUAL_ANALYSIS.md` for direct page-image inspection without OCR.
-- `references/QUALITY_GATE.md` for installable, provisional, and rejected decisions.
-- `references/COPYRIGHT_POLICY.md` for export constraints.
-- `references/OUTPUT_SPEC.md` for the generated pack layout.
-- `assets/templates/generated-skill/` when compiling child skills.
+Do not ask the user to install generated child skills manually.
+
+1. Run structural validation when Python is available:
+
+```bash
+python scripts/validate_pack.py <generated-pack-directory>
+```
+
+2. Activate the pack for the current host:
+
+```bash
+python scripts/activate_pack.py <generated-pack-directory> \
+  --host <openclaw|hermes|claude-code> \
+  --workspace <current-workspace>
+```
+
+3. Use these default targets unless the user requests another scope:
+
+- OpenClaw: `<workspace>/.agents/skills/`
+- Claude Code: `<workspace>/.claude/skills/`
+- Hermes Agent: `$HERMES_HOME/skills/` or `~/.hermes/skills/`
+
+4. After activation, immediately open the generated book-level router `SKILL.md` and `manifest.yaml`.
+5. Treat all activated child skills as available for the remainder of the current session.
+6. If the host does not refresh its native skill index immediately, continue routing through this parent skill. Do not ask the user to reinstall the child skills.
+7. Write `reports/activation-report.yaml`.
+
+Host-specific behavior and fallback rules are defined in `references/HOST_ACTIVATION.md`.
 
 ## Output layout
 
-Use the layout defined in `references/OUTPUT_SPEC.md`.
+Use `references/OUTPUT_SPEC.md`.
 
 At minimum generate:
 
@@ -215,6 +257,19 @@ At minimum generate:
 - `reports/visual-coverage.yaml`
 - `reports/quality-report.yaml`
 - `reports/copyright-report.yaml`
+- `reports/activation-report.yaml`
+
+## Same-session use rule
+
+After generating and activating a pack:
+
+- keep the router skill and manifest in working context
+- on a matching follow-up request, select the relevant child skill from the manifest
+- open that child skill's `SKILL.md` and only the references it needs
+- follow the child skill as if the host had invoked it natively
+- prefer native host invocation when the host has already refreshed its skill index
+
+This rule is required so newly generated skills remain usable even when a host snapshots its skill catalog at session start.
 
 ## Copyright policy
 
@@ -223,7 +278,7 @@ At minimum generate:
 - Do not export source page images by default.
 - Use page references and concise derived descriptions.
 - Reconstruct diagrams only when necessary and label them as reconstructions.
-- Keep source books outside the generated installable skills unless the user explicitly requests a private local bundle and has the rights to do so.
+- Keep source books outside activated child-skill directories.
 
 ## Financial-safety policy
 
@@ -231,33 +286,33 @@ Generated skills must not:
 
 - promise returns
 - claim certainty
-- present matching a method as a buy or sell instruction
+- present matching a method as an automatic buy or sell instruction
 - imply that an author's method has been empirically validated
 - connect to a broker
 - submit an order
 
 Include a concise research-only boundary in strategy, risk, and pattern skills.
 
-## Deterministic validation and packaging
+## Optional packaging
 
-When Python is available, run:
+Packaging is optional and does not affect activation:
 
 ```bash
-python scripts/validate_pack.py <generated-pack-directory>
 python scripts/package_skills.py <generated-pack-directory>
 ```
-
-Treat validation failures as release blockers. The scripts do not understand the book and do not replace source or visual verification; they only enforce deterministic structure, safety, and packaging checks.
 
 ## Final response
 
 Report:
 
 - source files processed
+- detected host
 - book mode
 - pages and figures covered
-- number of installable, provisional, and rejected skills
+- number of accepted, provisional, and rejected skills
+- activated skill names
+- activation target
+- same-session router status
 - unresolved parameters
 - warnings
-- output directory
-- the exact directories that are independently installable
+- pack output directory
