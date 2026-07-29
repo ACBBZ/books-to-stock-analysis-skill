@@ -52,7 +52,7 @@ def _frontmatter(text: str) -> dict[str, str]:
     for line in text[4:end].splitlines():
         key, separator, value = line.partition(":")
         if separator:
-            values[key.strip()] = value.strip().strip('"\'')
+            values[key.strip()] = value.strip().strip("\"'")
     return values
 
 
@@ -64,7 +64,6 @@ def _require(path: Path, report: ValidationReport) -> None:
 def validate_skill(skill_dir: Path, report: ValidationReport) -> None:
     required = (
         skill_dir / "SKILL.md",
-        skill_dir / "agents" / "openai.yaml",
         skill_dir / "references" / "provenance.yaml",
         skill_dir / "tests" / "trigger-tests.yaml",
     )
@@ -101,6 +100,11 @@ def validate_skill(skill_dir: Path, report: ValidationReport) -> None:
             if section not in text:
                 report.error(f"{trigger_tests}: missing {section}")
 
+    # Host-specific metadata is optional. SKILL.md is the portable source of truth.
+    openai_metadata = skill_dir / "agents" / "openai.yaml"
+    if openai_metadata.exists() and "interface:" not in _read(openai_metadata, report):
+        report.warn(f"{openai_metadata}: expected an interface section")
+
 
 def validate_pack(pack_dir: Path, allow_empty: bool = False) -> ValidationReport:
     report = ValidationReport()
@@ -136,11 +140,13 @@ def validate_pack(pack_dir: Path, allow_empty: bool = False) -> ValidationReport
     installable = pack_dir / "installable"
     skill_dirs = sorted(path for path in installable.iterdir() if path.is_dir()) if installable.is_dir() else []
     if not skill_dirs and not allow_empty:
-        report.error(f"No independently installable skills found in {installable}")
+        report.error(f"No generated skills found in {installable}")
     for skill_dir in skill_dirs:
         validate_skill(skill_dir, report)
 
     for path in pack_dir.rglob("*"):
+        if path.is_symlink():
+            report.error(f"Generated pack must not contain symlinks: {path}")
         if path.is_file() and path.suffix.lower() in SOURCE_EXTENSIONS:
             report.error(f"Source book file must not be embedded in generated pack: {path}")
 
@@ -170,7 +176,7 @@ def _print_report(report: ValidationReport) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("pack", type=Path, help="Generated Skill Pack directory")
-    parser.add_argument("--allow-empty", action="store_true", help="Allow a pack with no installable skills")
+    parser.add_argument("--allow-empty", action="store_true", help="Allow a pack with no generated skills")
     args = parser.parse_args(argv)
     report = validate_pack(args.pack, allow_empty=args.allow_empty)
     _print_report(report)
