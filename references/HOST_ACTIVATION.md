@@ -1,11 +1,11 @@
 # Host Activation
 
-Generated skills must be usable without asking the user to perform a second manual installation.
+Generated Skills must be usable without asking the user to perform a second manual installation.
 
-The meta-skill uses two activation layers:
+The Skill uses two activation layers:
 
-1. **Native activation** — copy accepted child skills into the active host's recognized skill directory.
-2. **Same-session routing** — immediately load the generated router and manifest, so the parent meta-skill can use child skills even if the host has not refreshed its native skill index yet.
+1. **Native activation** — copy accepted child Skills into the active host's recognized Skill directory.
+2. **Same-session routing** — immediately load the generated router and manifest, so the parent Skill can use child Skills even if the host has not refreshed its native Skill index yet.
 
 ## Resolve bundled tools
 
@@ -16,13 +16,50 @@ Never assume the current working directory is the repository or installed Skill 
 ```bash
 python "<skill-base>/scripts/validate_pack.py" "<pack>"
 python "<skill-base>/scripts/activate_pack.py" "<pack>" \
-  --host "<openclaw|hermes|claude-code>" \
+  --host "<codex|openclaw|hermes|claude-code>" \
   --workspace "<workspace>"
 ```
 
-Do not tell the user to install each generated child skill.
+## Common rule
 
-Every activated child skill keeps the same directory name as its `name` frontmatter. Existing different content is not overwritten unless `--force` is explicitly selected.
+Do not tell the user to install each generated child Skill.
+
+Every activated child Skill keeps the same directory name as its `name` frontmatter. Existing different content is not overwritten unless `--force` is explicitly selected.
+
+## Codex
+
+Default project target:
+
+```text
+<workspace>/.agents/skills/<skill-name>/SKILL.md
+```
+
+Global target:
+
+```text
+~/.agents/skills/<skill-name>/SKILL.md
+```
+
+Codex discovers project Skills under `.agents/skills`. After native discovery, invoke a generated Skill with:
+
+```text
+$<skill-name>
+```
+
+A new Codex session or restart may be required before a newly written Skill appears in the native Skills list. Until then, the parent Skill must keep the generated router loaded and use the child Skills through same-session routing.
+
+Install this repository in Codex by telling Codex:
+
+```text
+Install this Skill for me:
+https://github.com/ACBBZ/books-to-stock-analysis-skill
+```
+
+or with the built-in installer:
+
+```text
+$skill-installer install https://github.com/ACBBZ/books-to-stock-analysis-skill
+```
 
 ## OpenClaw
 
@@ -31,6 +68,8 @@ Default project target:
 ```text
 <workspace>/.agents/skills/<skill-name>/SKILL.md
 ```
+
+OpenClaw recognizes project-agent Skills under `.agents/skills`. The parent Skill must also keep the generated router loaded for the current session because native slash-command discovery can depend on the active Skill snapshot.
 
 Global activation can target:
 
@@ -44,9 +83,7 @@ or, when `OPENCLAW_STATE_DIR` is unset:
 ~/.openclaw/skills/
 ```
 
-The parent meta-skill keeps the generated router loaded because native slash-command discovery can depend on the host's active Skill snapshot.
-
-Invocation:
+OpenClaw invocation:
 
 ```text
 /books-to-stock-analysis-skill
@@ -66,7 +103,7 @@ or, when `HERMES_HOME` is unset:
 ~/.hermes/skills/<skill-name>/SKILL.md
 ```
 
-When Hermes exposes `skill_manage`, the meta-skill may use it instead of raw file copying. It must still load the generated router immediately for the current session.
+Hermes uses this directory as its primary Skill store. When the host exposes `skill_manage`, the parent Skill may use it instead of raw file copying. The parent Skill must still load the generated router immediately for the current session.
 
 A project-scoped alternative is:
 
@@ -74,11 +111,9 @@ A project-scoped alternative is:
 <workspace>/.agents/skills/
 ```
 
-Hermes must have that absolute path configured under `skills.external_dirs` in `~/.hermes/config.yaml`.
+but Hermes must have that absolute path configured under `skills.external_dirs` in `~/.hermes/config.yaml`.
 
-When installed from a direct `SKILL.md` URL, all relative bundled references and scripts listed by the parent Skill must be present. Missing resources are an incomplete installation error.
-
-Invocation:
+Hermes invocation:
 
 ```text
 /books-to-stock-analysis-skill
@@ -92,15 +127,15 @@ Default project target:
 <workspace>/.claude/skills/<skill-name>/SKILL.md
 ```
 
+Claude Code monitors existing personal and project Skill roots for changes and normally hot-loads new child Skills in the current session. If the top-level `.claude/skills` directory did not exist when the session started, the parent Skill remains the same-session fallback.
+
 Global activation can target:
 
 ```text
 ~/.claude/skills/
 ```
 
-Claude Code normally hot-loads changes beneath existing personal and project Skill roots. If native discovery has not refreshed, the parent meta-skill remains the same-session fallback.
-
-Invocation:
+Claude Code invocation:
 
 ```text
 /books-to-stock-analysis-skill
@@ -108,14 +143,14 @@ Invocation:
 
 ## Same-session routing
 
-After native activation, the meta-skill must:
+After native activation, the parent Skill must:
 
 1. Open `<pack>/manifest.yaml`.
 2. Locate the book-level router under `<pack>/installable/`.
 3. Open the router's `SKILL.md`.
 4. Keep the router and child-Skill index available for follow-up requests.
 5. When a follow-up matches a child Skill, open that child's `SKILL.md` and required references.
-6. Follow it directly even if the host has not yet exposed a native slash command.
+6. Follow it directly even if the host has not yet exposed a native command.
 
 This is not a second installation. It is the continuation of the same generation workflow.
 
@@ -125,8 +160,8 @@ Write `<pack>/reports/activation-report.yaml`:
 
 ```yaml
 schema_version: "1.0"
-host: claude-code
-target_root: "/workspace/.claude/skills"
+host: codex
+target_root: "/workspace/.agents/skills"
 activated:
   - book-router
   - volume-price-breakout
@@ -136,8 +171,7 @@ warnings: []
 
 ## Safety
 
-- Validate the complete pack before activation.
-- Reject symlinks inside generated child skills.
+- Reject symlinks inside generated child Skills.
 - Do not copy original books into host Skill directories.
 - Do not overwrite a different existing Skill unless replacement is explicit.
 - Preserve provenance, trigger tests, and supporting references.
