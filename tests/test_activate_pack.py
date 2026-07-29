@@ -27,6 +27,7 @@ def _pack(tmp_path: Path) -> Path:
         "book_mode: [technical_analysis]\n"
         "counts:\n  installable: 1\n"
         "skills: []\n"
+        "activation:\n  requested: true\n"
         "copyright:\n  source_files_embedded: false\n",
     )
     for directory in ("provisional", "rejected"):
@@ -46,7 +47,7 @@ def _pack(tmp_path: Path) -> Path:
     _write(
         skill / "SKILL.md",
         "---\nname: demo-skill\n"
-        "description: Demo source-grounded skill for testing automatic activation.\n"
+        "description: Demo source-grounded Skill for testing automatic activation.\n"
         "---\n# Demo\n",
     )
     _write(
@@ -58,6 +59,41 @@ def _pack(tmp_path: Path) -> Path:
         "positive: []\nnegative: []\nambiguous: []\nadversarial: []\n",
     )
     return pack
+
+
+def test_codex_project_activation(tmp_path: Path) -> None:
+    pack = _pack(tmp_path)
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+
+    report = activate_pack.activate_pack(
+        pack,
+        host="codex",
+        workspace=workspace,
+        home=tmp_path / "home",
+    )
+
+    assert (workspace / ".agents" / "skills" / "demo-skill" / "SKILL.md").exists()
+    assert report.activated == ["demo-skill"]
+    assert report.host == "codex"
+    assert (pack / "reports" / "activation-report.yaml").exists()
+
+
+def test_codex_global_activation(tmp_path: Path) -> None:
+    pack = _pack(tmp_path)
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    home = tmp_path / "home"
+
+    activate_pack.activate_pack(
+        pack,
+        host="codex",
+        workspace=workspace,
+        home=home,
+        scope="global",
+    )
+
+    assert (home / ".agents" / "skills" / "demo-skill" / "SKILL.md").exists()
 
 
 def test_claude_project_activation(tmp_path: Path) -> None:
