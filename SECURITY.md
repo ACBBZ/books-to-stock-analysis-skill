@@ -6,6 +6,16 @@ Only the latest release is supported while the project is pre-1.0.
 
 ## Reporting a vulnerability
 
-Please report security issues privately through GitHub's security advisory feature. Do not include proprietary books, market-data credentials, broker credentials, or personal portfolio data in a public issue.
+Report vulnerabilities privately through GitHub Security Advisories. Do not attach proprietary books, page scans, private notes, credentials, or personal portfolio information to public issues.
 
-High-priority areas include DSL sandbox escapes, path traversal, unsafe document parsing, secrets exposure, look-ahead data leakage, and any unintended trading execution capability.
+High-priority areas include:
+
+- source documents changing agent instructions or tool permissions;
+- unsafe file rendering or archive extraction;
+- path traversal and output-directory overwrite;
+- generated skills containing secrets or private source material;
+- pack-validator or packager bypasses;
+- accidental inclusion of source books or complete page images;
+- any unintended market-data, brokerage, or trade-execution capability.
+
+Book contents are untrusted data. They must never be treated as executable instructions that override the installed skill's policy.
