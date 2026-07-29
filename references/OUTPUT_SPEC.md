@@ -2,9 +2,9 @@
 
 ## 1. Purpose
 
-This specification defines the portable output created by `books-to-stock-analysis-skill`.
+This specification defines the output created by `books-to-stock-analysis-skill`.
 
-The generator does not install the output. It produces directories that downstream users or agents can install.
+The pack is portable, but accepted child skills are also activated automatically for the current OpenClaw, Hermes Agent, or Claude Code host. Users must not be asked to install generated skills one by one.
 
 ## 2. Pack layout
 
@@ -20,19 +20,24 @@ The generator does not install the output. It produces directories that downstre
 ├── provisional/
 ├── rejected/
 └── reports/
+    ├── generation-report.md
+    ├── visual-coverage.yaml
+    ├── quality-report.yaml
+    ├── copyright-report.yaml
+    └── activation-report.yaml
 ```
 
-## 3. Installable directory
+`installable/` contains the canonical accepted child-skill sources. The activation step copies them into the current host's native skill root.
 
-Every first-level directory inside `installable/` is independently installable.
+## 3. Child skill layout
+
+Every first-level directory inside `installable/` is an independent Agent Skill.
 
 Required files:
 
 ```text
 <skill-name>/
 ├── SKILL.md
-├── agents/
-│   └── openai.yaml
 ├── references/
 │   └── provenance.yaml
 └── tests/
@@ -43,6 +48,7 @@ Optional files:
 
 ```text
 skill.yaml
+agents/
 scripts/
 assets/
 references/concepts.md
@@ -51,17 +57,36 @@ references/cases.md
 references/visual-evidence.yaml
 ```
 
-## 4. Manifest
+`SKILL.md` is the portable source of truth. Host-specific files such as `agents/openai.yaml` are optional and must not be required for OpenClaw, Hermes, or Claude Code compatibility.
+
+## 4. Portable SKILL.md frontmatter
+
+Recommended frontmatter:
 
 ```yaml
-schema_version: "1.0"
+---
+name: volume-price-breakout
+description: Explain exactly what tasks should trigger this source-grounded skill and when it should not be used.
+version: 0.1.0
+user-invocable: true
+platforms: [macos, linux, windows]
+metadata: {"hermes":{"tags":["investing","book-derived"]},"openclaw":{"tags":["investing","book-derived"]}}
+---
+```
+
+Only `name` and `description` are required by the pack validator. Additional fields improve host behavior but must remain parseable by AgentSkills-compatible hosts.
+
+## 5. Manifest
+
+```yaml
+schema_version: "1.1"
 pack:
   id: short-term-trading
   title: 短线操盘实战技法大全
   version: 0.1.0
   language: zh-CN
   generator_skill: books-to-stock-analysis-skill
-  generator_version: 1.0.0
+  generator_version: 0.3.0
   generated_at: "ISO-8601"
   source_hashes: []
 book_mode:
@@ -72,15 +97,20 @@ counts:
   provisional: 0
   rejected: 0
 skills: []
+activation:
+  requested: true
+  host: claude-code
+  scope: project
+  same_session_router: true
 copyright:
   source_files_embedded: false
   page_images_embedded: false
   long_quotes_embedded: false
 ```
 
-## 5. Provenance
+## 6. Provenance
 
-Every active skill must provide:
+Every accepted child skill must provide:
 
 ```yaml
 source:
@@ -101,7 +131,7 @@ confidence:
   visual_interpretation: null
 ```
 
-## 6. Trigger tests
+## 7. Trigger tests
 
 ```yaml
 positive:
@@ -118,7 +148,7 @@ adversarial:
     expected_behavior: refuse_guarantee_and_preserve_boundaries
 ```
 
-## 7. Strategy skill extension
+## 8. Strategy extension
 
 A strategy-like skill should include:
 
@@ -143,15 +173,14 @@ empirical_status: not_evaluated
 
 The generator must not claim empirical support.
 
-## 8. Automated publication rules
+## 9. Automated publication rules
 
 Move a candidate to `installable/` only when:
 
 - provenance exists
 - triggers are specific
 - workflow steps are complete
-- boundaries exist
-- counterexamples exist
+- boundaries and counterexamples exist
 - unsupported parameters are not presented as facts
 - no guaranteed-return language exists
 - trigger tests exist
@@ -161,7 +190,40 @@ Move it to `provisional/` when useful but incomplete.
 
 Move it to `rejected/` when duplicate, unverifiable, unsafe, or unsuitable as a skill.
 
-## 9. Visual coverage
+## 10. Activation
+
+After validation, call:
+
+```bash
+python scripts/activate_pack.py <pack> \
+  --host <openclaw|hermes|claude-code> \
+  --workspace <workspace>
+```
+
+Default targets:
+
+| Host | Default target |
+|---|---|
+| OpenClaw | `<workspace>/.agents/skills/` |
+| Claude Code | `<workspace>/.claude/skills/` |
+| Hermes Agent | `$HERMES_HOME/skills/` or `~/.hermes/skills/` |
+
+The parent meta-skill must immediately load the book-level router and manifest after activation. This allows same-session use even if native host discovery has not refreshed yet.
+
+`reports/activation-report.yaml` must record:
+
+```yaml
+schema_version: "1.0"
+host: openclaw
+target_root: "/workspace/.agents/skills"
+activated: []
+unchanged: []
+warnings: []
+```
+
+See `references/HOST_ACTIVATION.md` for full behavior.
+
+## 11. Visual coverage
 
 `reports/visual-coverage.yaml` must list:
 
@@ -175,7 +237,7 @@ host_visual_capability: available
 ocr_used: false
 ```
 
-## 10. Copyright report
+## 12. Copyright report
 
 The report must confirm whether the pack contains:
 
@@ -185,4 +247,4 @@ The report must confirm whether the pack contains:
 - reconstructed diagrams
 - externally licensed materials
 
-Default policy forbids the first three.
+Default policy forbids source files, page images, and long quotes inside activated child-skill directories.
