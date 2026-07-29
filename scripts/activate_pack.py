@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Activate generated Agent Skills for OpenClaw, Hermes, or Claude Code.
+"""Activate generated Agent Skills for Codex, OpenClaw, Hermes, or Claude Code.
 
 The command validates a pack, then copies every accepted skill under
 PACK/installable into the active host's native skill directory. It is intended
@@ -21,7 +21,7 @@ from pathlib import Path
 
 from validate_pack import validate_pack
 
-SUPPORTED_HOSTS = ("openclaw", "hermes", "claude-code")
+SUPPORTED_HOSTS = ("codex", "openclaw", "hermes", "claude-code")
 SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 
@@ -109,11 +109,14 @@ def detect_host(workspace: Path) -> str:
         markers.append("openclaw")
     if os.environ.get("HERMES_HOME"):
         markers.append("hermes")
+    if (workspace / ".codex").exists() or os.environ.get("CODEX_HOME"):
+        markers.append("codex")
 
     if len(set(markers)) == 1:
         return markers[0]
 
     commands = {
+        "codex": shutil.which("codex"),
         "openclaw": shutil.which("openclaw"),
         "hermes": shutil.which("hermes"),
         "claude-code": shutil.which("claude"),
@@ -123,8 +126,8 @@ def detect_host(workspace: Path) -> str:
         return available[0]
 
     raise ActivationError(
-        "Cannot determine the active host safely. Pass --host openclaw, "
-        "--host hermes, or --host claude-code."
+        "Cannot determine the active host safely. Pass --host codex, openclaw, "
+        "hermes, or claude-code."
     )
 
 
@@ -146,8 +149,10 @@ def target_root_for(host: str, workspace: Path, home: Path, scope: str) -> Path:
     if host == "openclaw":
         state_dir = Path(os.environ.get("OPENCLAW_STATE_DIR", home / ".openclaw"))
         return state_dir.expanduser() / "skills"
-    hermes_home = Path(os.environ.get("HERMES_HOME", home / ".hermes"))
-    return hermes_home.expanduser() / "skills"
+    if host == "hermes":
+        hermes_home = Path(os.environ.get("HERMES_HOME", home / ".hermes"))
+        return hermes_home.expanduser() / "skills"
+    return home / ".agents" / "skills"
 
 
 def _copy_skill(source: Path, destination: Path, force: bool) -> str:
@@ -241,13 +246,19 @@ def activate_pack(
         )
     if host == "openclaw":
         report.warnings.append(
-            "The parent meta-skill can use generated skills immediately. Native slash-command "
+            "The parent Skill can use generated skills immediately. Native slash-command "
             "discovery may refresh on the next OpenClaw turn or session."
         )
     if host == "claude-code":
         report.warnings.append(
             "Claude Code hot-reloads skills when its skills root is already watched. "
-            "The parent meta-skill remains the same-session fallback."
+            "The parent Skill remains the same-session fallback."
+        )
+    if host == "codex":
+        report.warnings.append(
+            "Codex discovers project skills under .agents/skills. A new session or restart "
+            "may be required before they appear in the native Skills list; the parent Skill "
+            "remains the same-session fallback."
         )
 
     _write_report(pack_dir, report)
@@ -278,7 +289,10 @@ def main(argv: list[str] | None = None) -> int:
         "--scope",
         choices=("auto", "project", "global"),
         default="auto",
-        help="Auto uses project scope for OpenClaw/Claude Code and global scope for Hermes",
+        help=(
+            "Auto uses project scope for Codex/OpenClaw/Claude Code and global scope "
+            "for Hermes"
+        ),
     )
     parser.add_argument("--workspace", type=Path, default=Path.cwd())
     parser.add_argument("--home", type=Path, default=Path.home())
