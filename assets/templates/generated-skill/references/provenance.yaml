@@ -1,0 +1,11 @@
+source:
+  source_id: book-001
+  title: ""
+  author: ""
+  edition: ""
+  file_hash: ""
+  locations: []
+confidence:
+  extraction: 0.0
+  source_fidelity: 0.0
+  visual_interpretation: null
