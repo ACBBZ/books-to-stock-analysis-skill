@@ -1,7 +1,7 @@
 ---
 name: books-to-stock-analysis-skill
-description: Convert stock-market, trading, investing, financial-analysis, or investor-biography books into source-traceable Agent Skills, then activate accepted skills automatically for OpenClaw, Hermes Agent, or Claude Code so the current agent can use them without a second manual install. Read native text when available and inspect charts, figures, and scanned pages directly. Do not use OCR engines, fetch market data, backtest returns, connect to brokers, or execute trades.
-version: 0.3.1
+description: Convert stock-market, trading, investing, financial-analysis, or investor-biography books into source-traceable Agent Skills, then activate accepted skills automatically for Codex, OpenClaw, Hermes Agent, or Claude Code so the current agent can use them without a second manual install. Read native text when available and inspect charts, figures, and scanned pages directly. Do not use OCR engines, fetch market data, backtest returns, connect to brokers, or execute trades.
+version: 0.3.2
 user-invocable: true
 platforms: [macos, linux, windows]
 metadata: {"hermes":{"tags":["investing","books","skill-generator"],"category":"research"},"openclaw":{"tags":["investing","books","skill-generator"]}}
@@ -13,11 +13,12 @@ Convert user-provided investing sources into copyright-aware, source-traceable c
 
 ## Supported hosts
 
+- Codex
 - OpenClaw
 - Hermes Agent
 - Claude Code
 
-Other AgentSkills-compatible hosts may use the portable output, but automatic activation is defined only for these three.
+Other AgentSkills-compatible hosts may use the portable output, but automatic activation is defined only for these four hosts.
 
 ## Resolve this Skill's installation directory
 
@@ -72,7 +73,7 @@ This Skill does not own:
 1. Confirm every input file exists and is readable.
 2. Identify file type, size, page count when available, and whether a native text layer exists.
 3. Confirm the host can render or inspect page images.
-4. Identify the active host as `openclaw`, `hermes`, or `claude-code`.
+4. Identify the active host as `codex`, `openclaw`, `hermes`, or `claude-code`.
 5. Confirm the requested output directory and host activation target are writable.
 6. Load `<skill-base>/references/HOST_ACTIVATION.md`.
 7. Stop with a clear error if required image inspection or bundled resources are unavailable.
@@ -227,12 +228,13 @@ When Python is available, run scripts from `<skill-base>`:
 python "<skill-base>/scripts/validate_pack.py" "<generated-pack-directory>"
 
 python "<skill-base>/scripts/activate_pack.py" "<generated-pack-directory>" \
-  --host "<openclaw|hermes|claude-code>" \
+  --host "<codex|openclaw|hermes|claude-code>" \
   --workspace "<current-workspace>"
 ```
 
 Default native activation targets:
 
+- Codex: `<workspace>/.agents/skills/`; global mode uses `~/.agents/skills/`
 - OpenClaw: `<workspace>/.agents/skills/`
 - Claude Code: `<workspace>/.claude/skills/`
 - Hermes Agent: `$HERMES_HOME/skills/` or `~/.hermes/skills/`
@@ -244,8 +246,10 @@ After native activation:
 3. Keep the router and child-Skill index available for the remainder of the current session.
 4. On a matching follow-up, open the relevant child `SKILL.md` and only the references it needs.
 5. Follow it directly even if the host has not refreshed its native Skill index.
-6. Prefer native slash-command invocation once the host exposes the generated Skill.
+6. Prefer native host invocation once the host exposes the generated Skill.
 7. Write `reports/activation-report.yaml`.
+
+For Codex, use `$<skill-name>` after the generated Skill appears in the native Skills list. A new session or restart may be required for native discovery; same-session routing remains available before that refresh.
 
 This same-session routing is required. The user must not be told to perform a second installation.
 
