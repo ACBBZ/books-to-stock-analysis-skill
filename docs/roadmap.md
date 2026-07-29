@@ -1,34 +1,36 @@
 # Roadmap
 
-## V0.2 — Installable meta-skill
+## V0.3 — Cross-host meta-skill
 
-- Root `SKILL.md` usable by Codex and Agent Skills-compatible clients.
-- Chinese and English READMEs.
-- `agents/openai.yaml` metadata.
-- Output specification, taxonomy, visual policy, quality gate, and copyright policy.
-- Generated-skill templates.
-- Deterministic pack validator and reproducible packager.
+- Root `SKILL.md` compatible with OpenClaw, Hermes Agent, and Claude Code.
+- Chinese and English installation examples for all three hosts.
+- Portable child-skill template based on `SKILL.md`.
+- Automatic host-native activation with same-session routing fallback.
+- Deterministic validation, activation, and reproducible packaging tools.
 
-## V0.3 — Source mapping workflow
+## V0.4 — Source mapping workflow
 
 - Native PDF/EPUB/DOCX text-layer guidance.
 - Direct page-image inspection with no OCR engine.
 - Chapter, page, figure, and visual-coverage reports.
 - Checkpoint and resume conventions for large books.
 
-## V0.4 — Automated extraction and verification
+## V0.5 — Automated extraction and verification
 
 - Technical-analysis, value-investing, financial-analysis, biography, and mixed modes.
 - Candidate taxonomy and unresolved-parameter policy.
 - Independent source and visual verification passes.
 - Deduplication, conflict preservation, and boundary criticism.
 
-## V0.5 — Skill compilation
+## V0.6 — Skill compilation and live activation
 
-- Book router plus independently installable child skills.
+- Book router plus independent child skills.
 - `installable/`, `provisional/`, and `rejected/` release states.
 - Trigger and adversarial tests.
-- Manifest, provenance, copyright, and quality reports.
+- Manifest, provenance, copyright, quality, and activation reports.
+- OpenClaw `.agents/skills` activation.
+- Claude Code `.claude/skills` activation and hot reload.
+- Hermes `$HERMES_HOME/skills` activation.
 
 ## V1.0 — Reliable book-to-skill generator
 
@@ -38,7 +40,8 @@
 - Recovery from interrupted generation.
 - Stable automated quality gates.
 - Copyright-safe export checks.
+- Same-session generated-skill use verified on all supported hosts.
 
 ## Out of scope
 
-Live market data, current stock analysis, scanning, profitability backtests, broker connectivity, order execution, portfolio management, and installation of generated child skills.
+Live market data, current stock analysis, scanning, profitability backtests, broker connectivity, order execution, and portfolio management.
