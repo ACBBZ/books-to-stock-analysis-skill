@@ -1,6 +1,10 @@
 ---
 name: generated-skill-name
 description: Describe the exact tasks that should trigger this generated skill and the boundaries that distinguish it from neighboring skills.
+version: 0.1.0
+user-invocable: true
+platforms: [macos, linux, windows]
+metadata: {"hermes":{"tags":["investing","book-derived"]},"openclaw":{"tags":["investing","book-derived"]}}
 ---
 
 # Goal
