@@ -1,0 +1,52 @@
+schema_version: "1.0"
+identity:
+  id: volume-price-breakout
+  name: 量价突破（合成示例）
+  version: 0.1.0
+  locale: zh-CN
+  status: reviewed
+classification:
+  type: strategy
+  domains: [trend, volume-price]
+  intents: [analyze, explain]
+applicability:
+  markets: [CN_A_SHARE]
+  instruments: [common_stock]
+  timeframes:
+    primary: 1d
+    confirmation: [1w]
+  preferred_regimes: [bull, recovery, strong_range]
+  excluded_regimes: [liquidity_crisis]
+data_contract:
+  minimum_bars: 120
+  fields: [close, recent_high, volume_ratio, benchmark_up, weekly_trend_up, overextended]
+  benchmark_required: true
+  industry_required: false
+  adjustment: forward
+rules:
+  prerequisites:
+    all:
+      - bars_count >= 120
+  required:
+    all:
+      - close > recent_high
+  confirmation:
+    score:
+      - when: volume_ratio >= 1.5
+        weight: 0.50
+        label: 成交量达到20日均量的1.5倍
+      - when: benchmark_up
+        weight: 0.25
+        label: 基准指数趋势向上
+      - when: weekly_trend_up
+        weight: 0.25
+        label: 周线趋势向上
+  rejection:
+    any:
+      - overextended
+provenance:
+  book_id: synthetic-example
+  source_fragments: []
+  extraction_method: [human]
+  source_fidelity_score: 1.0
+  empirical_rating: unvalidated

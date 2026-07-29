@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+.venv/
+venv/
+.env
+.idea/
+.vscode/
+.DS_Store
+
+# Private/copyrighted sources and generated local data
+books/
+private-packs/
+data/
+cache/
+audit/
+*.pdf
+*.epub
+*.mobi
