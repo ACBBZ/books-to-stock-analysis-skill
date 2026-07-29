@@ -4,7 +4,7 @@
 
 This specification defines the output created by `books-to-stock-analysis-skill`.
 
-The pack is portable, but accepted child skills are also activated automatically for the current OpenClaw, Hermes Agent, or Claude Code host. Users must not be asked to install generated skills one by one.
+The pack is portable, and accepted child Skills are activated automatically for the current Codex, OpenClaw, Hermes Agent, or Claude Code host. Users must not be asked to install generated Skills one by one.
 
 ## 2. Pack layout
 
@@ -27,9 +27,9 @@ The pack is portable, but accepted child skills are also activated automatically
     └── activation-report.yaml
 ```
 
-`installable/` contains the canonical accepted child-skill sources. The activation step copies them into the current host's native skill root.
+`installable/` contains the canonical accepted child-Skill sources. The activation step copies them into the current host's native Skill root.
 
-## 3. Child skill layout
+## 3. Child Skill layout
 
 Every first-level directory inside `installable/` is an independent Agent Skill.
 
@@ -57,7 +57,7 @@ references/cases.md
 references/visual-evidence.yaml
 ```
 
-`SKILL.md` is the portable source of truth. Host-specific files such as `agents/openai.yaml` are optional and must not be required for OpenClaw, Hermes, or Claude Code compatibility.
+`SKILL.md` is the portable source of truth. Host-specific files such as `agents/openai.yaml` are optional and must not be required for Codex, OpenClaw, Hermes, or Claude Code compatibility.
 
 ## 4. Portable SKILL.md frontmatter
 
@@ -66,7 +66,7 @@ Recommended frontmatter:
 ```yaml
 ---
 name: volume-price-breakout
-description: Explain exactly what tasks should trigger this source-grounded skill and when it should not be used.
+description: Explain exactly what tasks should trigger this source-grounded Skill and when it should not be used.
 version: 0.1.0
 user-invocable: true
 platforms: [macos, linux, windows]
@@ -86,7 +86,7 @@ pack:
   version: 0.1.0
   language: zh-CN
   generator_skill: books-to-stock-analysis-skill
-  generator_version: 0.3.0
+  generator_version: 0.3.2
   generated_at: "ISO-8601"
   source_hashes: []
 book_mode:
@@ -99,7 +99,7 @@ counts:
 skills: []
 activation:
   requested: true
-  host: claude-code
+  host: codex
   scope: project
   same_session_router: true
 copyright:
@@ -110,7 +110,7 @@ copyright:
 
 ## 6. Provenance
 
-Every accepted child skill must provide:
+Every accepted child Skill must provide:
 
 ```yaml
 source:
@@ -150,7 +150,7 @@ adversarial:
 
 ## 8. Strategy extension
 
-A strategy-like skill should include:
+A strategy-like Skill should include:
 
 ```yaml
 classification:
@@ -188,7 +188,7 @@ Move a candidate to `installable/` only when:
 
 Move it to `provisional/` when useful but incomplete.
 
-Move it to `rejected/` when duplicate, unverifiable, unsafe, or unsuitable as a skill.
+Move it to `rejected/` when duplicate, unverifiable, unsafe, or unsuitable as a Skill.
 
 ## 10. Activation
 
@@ -196,7 +196,7 @@ After validation, call:
 
 ```bash
 python scripts/activate_pack.py <pack> \
-  --host <openclaw|hermes|claude-code> \
+  --host <codex|openclaw|hermes|claude-code> \
   --workspace <workspace>
 ```
 
@@ -204,17 +204,18 @@ Default targets:
 
 | Host | Default target |
 |---|---|
+| Codex | `<workspace>/.agents/skills/` |
 | OpenClaw | `<workspace>/.agents/skills/` |
 | Claude Code | `<workspace>/.claude/skills/` |
 | Hermes Agent | `$HERMES_HOME/skills/` or `~/.hermes/skills/` |
 
-The parent meta-skill must immediately load the book-level router and manifest after activation. This allows same-session use even if native host discovery has not refreshed yet.
+The parent Skill must immediately load the book-level router and manifest after activation. This allows same-session use even if native host discovery has not refreshed yet.
 
 `reports/activation-report.yaml` must record:
 
 ```yaml
 schema_version: "1.0"
-host: openclaw
+host: codex
 target_root: "/workspace/.agents/skills"
 activated: []
 unchanged: []
@@ -247,4 +248,4 @@ The report must confirm whether the pack contains:
 - reconstructed diagrams
 - externally licensed materials
 
-Default policy forbids source files, page images, and long quotes inside activated child-skill directories.
+Default policy forbids source files, page images, and long quotes inside activated child-Skill directories.
