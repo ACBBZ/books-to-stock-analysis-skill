@@ -18,6 +18,30 @@ def _write(path: Path, content: str = "x\n") -> None:
 
 def _pack(tmp_path: Path) -> Path:
     pack = tmp_path / "pack"
+    for name in ("PACK.md", "BOOK_OVERVIEW.md", "INDEX.md", "GLOSSARY.md", "source-map.yaml"):
+        _write(pack / name)
+    _write(
+        pack / "manifest.yaml",
+        "schema_version: '1.1'\n"
+        "pack:\n  id: demo\n"
+        "book_mode: [technical_analysis]\n"
+        "counts:\n  installable: 1\n"
+        "skills: []\n"
+        "copyright:\n  source_files_embedded: false\n",
+    )
+    for directory in ("provisional", "rejected"):
+        (pack / directory).mkdir(parents=True)
+    _write(pack / "reports" / "generation-report.md")
+    _write(
+        pack / "reports" / "visual-coverage.yaml",
+        "pages_inspected_visually: []\n"
+        "figures_unresolved: []\n"
+        "host_visual_capability: available\n"
+        "ocr_used: false\n",
+    )
+    _write(pack / "reports" / "quality-report.yaml")
+    _write(pack / "reports" / "copyright-report.yaml")
+
     skill = pack / "installable" / "demo-skill"
     _write(
         skill / "SKILL.md",
