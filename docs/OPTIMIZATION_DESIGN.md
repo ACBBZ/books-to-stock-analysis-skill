@@ -2,9 +2,9 @@
 
 ## 1. Product definition
 
-`books-to-stock-analysis-skill` is an installable meta-skill for OpenClaw, Hermes Agent, and Claude Code.
+`books-to-stock-analysis-skill` is an installable Skill for Codex, OpenClaw, Hermes Agent, and Claude Code.
 
-It converts a user-provided investing source into new Agent Skills and activates accepted child skills automatically for the current host.
+It converts a user-provided investing source into new Agent Skills and activates accepted child Skills automatically for the current host.
 
 ```text
 investing source
@@ -14,64 +14,72 @@ investing source
   -> candidate knowledge extraction
   -> independent source verification
   -> deduplication, boundaries, and conflict handling
-  -> child-skill compilation
+  -> child-Skill compilation
   -> automated quality gate
   -> host-native activation
   -> same-session use
 ```
 
-The user installs only the meta-skill. Generated child skills do not require a second manual installation step.
+The user installs only this Skill. Generated child Skills do not require a second manual installation step.
 
 ## 2. Supported hosts
 
+### Codex
+
+- Skill installation: tell Codex to install the GitHub repository, or use `$skill-installer` with the repository URL.
+- Generated project Skills: `<workspace>/.agents/skills/`.
+- Global generated Skills: `~/.agents/skills/`.
+- Invocation after native discovery: `$books-to-stock-analysis-skill`.
+- A new session or restart may be required to refresh the native Skill list.
+
 ### OpenClaw
 
-- Meta-skill installation: Git skill install.
-- Generated project skills: `<workspace>/.agents/skills/`.
-- Global generated skills: `$OPENCLAW_STATE_DIR/skills/` or `~/.openclaw/skills/`.
+- Skill installation: Git Skill installation.
+- Generated project Skills: `<workspace>/.agents/skills/`.
+- Global generated Skills: `$OPENCLAW_STATE_DIR/skills/` or `~/.openclaw/skills/`.
 - Invocation: `/books-to-stock-analysis-skill`.
 
 ### Hermes Agent
 
-- Meta-skill installation: direct `SKILL.md` URL or another Hermes source.
-- Generated skills: `$HERMES_HOME/skills/` or `~/.hermes/skills/`.
+- Skill installation: direct `SKILL.md` URL or another Hermes source.
+- Generated Skills: `$HERMES_HOME/skills/` or `~/.hermes/skills/`.
 - Optional project sharing: `.agents/skills/` configured through `skills.external_dirs`.
 - Invocation: `/books-to-stock-analysis-skill`.
 
 ### Claude Code
 
-- Meta-skill installation: clone into `~/.claude/skills/` or project `.claude/skills/`.
-- Generated project skills: `<workspace>/.claude/skills/`.
-- Global generated skills: `~/.claude/skills/`.
+- Skill installation: clone into `~/.claude/skills/` or project `.claude/skills/`.
+- Generated project Skills: `<workspace>/.claude/skills/`.
+- Global generated Skills: `~/.claude/skills/`.
 - Invocation: `/books-to-stock-analysis-skill`.
 
 ## 3. Direct-use requirement
 
-The generated skills must be usable without asking the user to install them.
+Generated Skills must be usable without asking the user to install them.
 
 The design uses two mechanisms:
 
 ### Native activation
 
-Accepted child-skill directories are copied into the active host's native skill root.
+Accepted child-Skill directories are copied into the active host's native Skill root.
 
 ```bash
 python scripts/activate_pack.py <pack> \
-  --host <openclaw|hermes|claude-code> \
+  --host <codex|openclaw|hermes|claude-code> \
   --workspace <workspace>
 ```
 
 ### Same-session routing
 
-Some hosts snapshot their skill catalog. Therefore the parent meta-skill must immediately load:
+Some hosts snapshot their Skill catalog. Therefore the parent Skill must immediately load:
 
 - the generated pack manifest
-- the book-level router skill
-- the child-skill index
+- the book-level router Skill
+- the child-Skill index
 
-When a follow-up request matches a generated child skill, the parent opens and follows that child `SKILL.md` directly. Native host invocation is preferred after the host refreshes its catalog.
+When a follow-up request matches a generated child Skill, the parent opens and follows that child `SKILL.md` directly. Native host invocation is preferred after the host refreshes its catalog.
 
-This guarantees that the same agent can continue using generated knowledge during the generation session.
+This lets the same agent continue using generated knowledge during the generation session.
 
 ## 4. Scope
 
@@ -96,7 +104,7 @@ The project does not own:
 - order execution
 - portfolio management
 
-Generated child skills may describe what data a downstream agent requires, but this project does not fetch or evaluate that data.
+Generated child Skills may describe what data a downstream agent requires, but this project does not fetch or evaluate that data.
 
 ## 5. Source types
 
@@ -147,7 +155,7 @@ Narrative books and biographies must not be forced into mechanical buy/sell stra
 
 ## 8. Automatic validation
 
-No mandatory line-by-line human review is required, but accepted skills must pass independent automatic checks:
+No mandatory line-by-line human review is required, but accepted Skills must pass independent automatic checks:
 
 1. source mapping
 2. candidate extraction
@@ -187,7 +195,7 @@ generated-skills/<book-slug>/
     └── activation-report.yaml
 ```
 
-Every accepted child skill requires:
+Every accepted child Skill requires:
 
 ```text
 <skill-name>/
@@ -202,17 +210,19 @@ Host-specific metadata files are optional. Portable `SKILL.md` is the source of 
 
 | Host | Project target | Global target |
 |---|---|---|
+| Codex | `.agents/skills/` | `~/.agents/skills/` |
 | OpenClaw | `.agents/skills/` | `$OPENCLAW_STATE_DIR/skills/` or `~/.openclaw/skills/` |
 | Claude Code | `.claude/skills/` | `~/.claude/skills/` |
 | Hermes Agent | `.agents/skills/` with `external_dirs` | `$HERMES_HOME/skills/` or `~/.hermes/skills/` |
 
 Default behavior:
 
+- Codex: project target
 - OpenClaw: project target
 - Claude Code: project target
-- Hermes: global Hermes skill store
+- Hermes: global Hermes Skill store
 
-The activation tool refuses to overwrite different existing content unless `--force` is explicit and rejects symlinks in generated skills.
+The activation tool refuses to overwrite different existing content unless `--force` is explicit and rejects symlinks in generated Skills.
 
 ## 11. Portable frontmatter
 
@@ -221,7 +231,7 @@ Generated `SKILL.md` files should use common AgentSkills fields and optional hos
 ```yaml
 ---
 name: skill-name
-description: A precise description of what triggers this skill and its boundaries.
+description: A precise description of what triggers this Skill and its boundaries.
 version: 0.1.0
 user-invocable: true
 platforms: [macos, linux, windows]
@@ -233,7 +243,7 @@ The cross-host validator only requires `name` and `description`.
 
 ## 12. Safety and copyright
 
-Generated and activated skills must not:
+Generated and activated Skills must not:
 
 - include the source book
 - include source page scans by default
@@ -244,7 +254,7 @@ Generated and activated skills must not:
 - imply empirical validation
 - connect to a broker or submit an order
 
-Source books remain outside host skill directories.
+Source books remain outside host Skill directories.
 
 ## 13. Required reports
 
@@ -266,7 +276,7 @@ Records whether source files, page images, long quotes, or reconstructed diagram
 
 ### Activation report
 
-Records host, target root, activated skills, unchanged skills, and warnings.
+Records host, target root, activated Skills, unchanged Skills, and warnings.
 
 ## 14. Verification
 
@@ -285,11 +295,11 @@ Packaging is optional. Activation is part of the normal generation workflow.
 
 The project succeeds when:
 
-1. the meta-skill is installable on OpenClaw, Hermes, and Claude Code
+1. the Skill is installable on Codex, OpenClaw, Hermes, and Claude Code
 2. the agent can read book text and directly inspect images without OCR
-3. accepted child skills preserve provenance and boundaries
+3. accepted child Skills preserve provenance and boundaries
 4. low-confidence material is quarantined
-5. generated skills are activated automatically
+5. generated Skills are activated automatically
 6. the same agent can use them in the current session through the generated router
-7. future sessions discover them through the host's native skill directory
-8. no second manual child-skill installation is required
+7. future sessions discover them through the host's native Skill directory
+8. no second manual child-Skill installation is required
